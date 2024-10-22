@@ -1,0 +1,110 @@
+--- Выборка необходимой информации 
+Select 
+ flights. scheduled_departure,
+ flights. scheduled_arrival,
+ flights. departure_airport,
+ flights. arrival_airport,
+ tic_fl. flight_id,
+ tic_fl. fare_conditions,
+ tic_fl. amount,
+ air_date. model
+FROM 
+	flights AS flights
+	INNER JOIN 
+		ticket_flights AS tic_fl
+	ON 
+		flights.flight_id = tic_fl. flight_id
+	INNER JOIN 
+		aircrafts_data AS air_date
+	ON 
+		flights. aircraft_code = air_date.aircraft_code---
+
+---VIEW fare_conditions
+CREATE VIEW fare_conditions1 AS
+Select
+	 flights. scheduled_departure,
+	 flights. scheduled_arrival,
+	 flights. departure_airport,
+	 flights. arrival_airport,
+	 tic_fl. flight_id,
+	 tic_fl. fare_conditions,
+	 tic_fl. amount,
+	 air_date. model
+FROM 
+	flights AS flights
+	INNER JOIN
+		ticket_flights AS tic_fl
+	ON 
+		flights.flight_id = tic_fl. flight_id
+	INNER JOIN 
+		aircrafts_data AS air_date
+	ON 
+		flights. aircraft_code = air_date.aircraft_code
+	WHERE 
+		departure_airport = 'SGC' OR  departure_airport = 'HMA' OR departure_airport = 'TJM'
+
+Select *
+FROM fare_conditions1
+
+----Оконная функция
+Select 
+ 	fare_conditions,
+	COUNT(amount) AS fare_conditions1_cnt,
+	AVG (amount) AS fare_conditions1_avg
+FROM 
+	fare_conditions1 AS fare_conditions1
+	 GROUP BY
+	 fare_conditions
+	 ORDER BY
+	 fare_conditions;
+
+
+-- CASE 
+Select 
+	 amount,
+	 fare_conditions,
+ CASE 
+	 WHEN (amount) > 0 AND  (amount) <= 50000 THEN 'LOW'
+	 WHEN (amount) > 50000 AND  (amount) <= 100000 THEN 'MEDIUM'
+	 WHEN (amount) > 100000  THEN 'HIGH'
+	 END AS cat
+ FROM 
+  fare_conditions1
+ ORDER BY 
+  amount
+;
+
+--WITH
+WITH fare_conditions AS
+(Select 
+ fare_conditions,
+ COUNT (fare_conditions),
+ AVG (amount) AS fare_conditions1_avg
+ FROM fare_conditions1
+ GROUP BY fare_conditions
+)
+Select 
+	 CASE 
+	 WHEN (amount) > 0 AND  (amount) <= 50000 THEN 'LOW'
+	 WHEN (amount) > 50000 AND  (amount) <= 100000 THEN 'MEDIUM'
+	 WHEN (amount) > 100000  THEN 'HIGH'
+	 END AS cat
+FROM 
+  fare_conditions1;
+
+
+SELECT
+	TO_CHAR (scheduled_departure, 'YYYY.MM.DD') AS departure,
+	TO_CHAR (scheduled_arrival,'YYYY.MM.DD') AS arrival,
+	departure_airport,
+	arrival_airport,
+	fare_conditions,
+	amount,
+	model
+FROM 
+	fare_conditions1
+ORDER BY 
+	departure;
+
+
+
